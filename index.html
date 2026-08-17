@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12° BTPI - Universo de la Informática 3D</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Three.js para las animaciones 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05050a;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Lienzo 3D de fondo general */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Encabezado */
+        header {
+            text-align: center;
+            padding: 40px 20px 20px 20px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Contenedor del Logo 3D Interactivo */
+        #logo-3d-container {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.5));
+            transition: transform 0.3s ease;
+        }
+
+        #logo-3d-container:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            letter-spacing: 2px;
+            color: #00f0ff;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .tech-card {
+            background: rgba(15, 15, 35, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .tech-card h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff007f;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .tech-card p {
+            color: #d0d0e0;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        /* Secciones de Galerías */
+        .section-container {
+            max-width: 1000px;
+            width: 90%;
+            margin: 40px auto;
+            z-index: 2;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: #00f0ff;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-card {
+            background: rgba(15, 15, 35, 0.7);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+            border-color: #00f0ff;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+        }
+
+        .gallery-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f0ff;
+            margin-bottom: 15px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+
+        .gallery-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .gallery-card p {
+            font-size: 0.85rem;
+            color: #a0a0c0;
+        }
+
+        /* Estilos del Formulario Local y Sección Base de Datos */
+        .db-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .db-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: #00f0ff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(5, 5, 10, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: #fff;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #ff007f;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #00f0ff, #ff007f);
+            color: #05050a;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            width: 100%;
+            transition: opacity 0.3s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .local-list-container {
+            max-height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .local-record-item {
+            background: rgba(5, 5, 10, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #d0d0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .local-record-item div strong {
+            color: #ff007f;
+        }
+
+        .local-record-item span {
+            color: #00f0ff;
+        }
+
+        /* Pie de página */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(5, 5, 10, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 2;
+            font-size: 0.9rem;
+            color: #8888aa;
+            margin-top: 40px;
+        }
+
+        footer span {
+            color: #00f0ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas 3D de Fondo -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Encabezado -->
+    <header>
+        <!-- Logotipo 3D Interactivo con las iniciales KBQC -->
+        <div id="logo-3d-container"></div>
+        <h1>12° BTPI INFORMÁTICA 3D</h1>
+        <p class="subtitle">Promoción 12° BTPI - Explorando el núcleo del desarrollo digital y tecnológico</p>
+    </header>
+
+    <!-- Contenido Central -->
+    <main class="main-content">
+        <div class="tech-card" style="max-width: 600px;">
+            <h2>El Futuro del Software (12° BTPI)</h2>
+            <p>La informática impulsa la evolución del mundo moderno a través de la inteligencia artificial, la computación cuántica y los entornos interactivos tridimensionales en la web.</p>
+        </div>
+    </main>
+
+    <!-- Galería de Profesores -->
+    <section class="section-container">
+        <h2 class="section-title">Profesores de Informática</h2>
+        <div class="gallery-grid">
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Eluterio Moran</h3>
+                <p>Inteligencia Artificial & Machine Learning</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Celis Bonilla</h3>
+                <p>Arquitectura de Redes & Ciberseguridad</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Rosa Calix</h3>
+                <p>Desarrollo Web & Gráficos 3D</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Ever Mejia</h3>
+                <p>Computación Cuántica & Algoritmos</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Saul Hernandez</h3>
+                <p>Bases de Datos & Big Data</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Rigoberto Pinel</h3>
+                <p>Sistemas Operativos & DevOps</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Karina Guzman</h3>
+                <p>Ingeniería de Software & Testing</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Bella Suazo</h3>
+                <p>Robótica & Sistemas Embebidos</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Elvin</h3>
+                <p>Seguridad Informática & Cryptografía</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>Lic. Onys Santos</h3>
+                <p>Cloud Computing & Arquitectura Serverless</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&auto=format&fit=crop&q=80" alt="Profesor">
+                <h3>MSc. Adriana Rivas</h3>
+                <p>Interfaz Humano-Computadora & UX</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Galería de Estudiantes -->
+    <section class="section-container">
+        <h2 class="section-title">Estudiantes Destacados - 12° BTPI</h2>
+        <div class="gallery-grid">
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80" alt="Estudiante">
+                <h3>Alejandro Torres</h3>
+                <p>Especialista en Frontend & UI/UX</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80" alt="Estudiante">
+                <h3>Valeria Morales</h3>
+                <p>Ingeniería de Software & Backend</p>
+            </div>
+            <div class="gallery-card">
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&auto=format&fit=crop&q=80" alt="Estudiante">
+                <h3>Mateo Fernández</h3>
+                <p>Desarrollo de Videojuegos & Three.js</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Apartado de Base de Datos Local con Cuadro al Lado -->
+    <section class="section-container">
+        <h2 class="section-title">Registro Local de Estudiantes (Base de Datos)</h2>
+        <div class="db-container">
+            <!-- Formulario de Registro -->
+            <div class="tech-card">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: #ff007f; margin-bottom: 20px; font-size: 1.3rem;">Nuevo Registro</h3>
+                <form id="local-student-form">
+                    <div class="form-group">
+                        <label for="db-name">Nombre del Estudiante:</label>
+                        <input type="text" id="db-name" placeholder="Ej. Katia Quintanilla" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="db-grade">Grado:</label>
+                        <input type="text" id="db-grade" placeholder="Ej. 12° BTPI" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="db-specialty">Carrera o Especialidad:</label>
+                        <input type="text" id="db-specialty" placeholder="Ej. Informática 3D" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Guardar en Base Local</button>
+                </form>
+            </div>
+
+            <!-- Cuadro Informativo al Lado -->
+            <div class="tech-card">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: #00f0ff; margin-bottom: 20px; font-size: 1.3rem;">Información Guardada</h3>
+                <div class="local-list-container" id="local-students-list">
+                    <!-- Registros dinámicos -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página con Derechos de Autor -->
+    <footer>
+        <p>&copy; 2026 Todos los derechos reservados | 12° BTPI | Creado por <span>Katia Quintanilla</span></p>
+    </footer>
+
+    <!-- Scripts de Animación 3D con Three.js y Base de Datos Local -->
+    <script>
+        // --- 1. FONDO 3D GENERAL (Partículas y Torus Knot) ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), alpha: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x00f0ff,
+            wireframe: true,
+            roughness: 0.2,
+            metalness: 0.8
+        });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 1000;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 100;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.2,
+            color: 0xff007f
+        });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        const pointLight = new THREE.PointLight(0xffffff, 2);
+        pointLight.position.set(20, 20, 20);
+        scene.add(pointLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        camera.position.z = 30;
+
+
+        // --- 2. LOGOTIPO 3D INTERACTIVO CON LAS INICIALES "KBQC" Y MOTIVO INFORMÁTICO ---
+        const logoContainer = document.getElementById('logo-3d-container');
+        const logoScene = new THREE.Scene();
+        const logoCamera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const logoRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        logoRenderer.setSize(logoContainer.clientWidth, logoContainer.clientHeight);
+        logoRenderer.setPixelRatio(window.devicePixelRatio);
+        logoContainer.appendChild(logoRenderer.domElement);
+
+        const logoGroup = new THREE.Group();
+
+        // Estructura exterior tecnológica (Hexágono / Cubo de Red)
+        const outerGeo = new THREE.BoxGeometry(2.6, 2.6, 2.6);
+        const outerMat = new THREE.MeshStandardMaterial({
+            color: 0x00f0ff,
+            wireframe: true,
+            roughness: 0.1,
+            metalness: 0.9
+        });
+        const outerMesh = new THREE.Mesh(outerGeo, outerMat);
+        logoGroup.add(outerMesh);
+
+        // Núcleo central con las iniciales moldeadas en geometría 3D o cubos integrados (KBQC)
+        const coreGeo = new THREE.OctahedronGeometry(1.2, 0);
+        const coreMat = new THREE.MeshStandardMaterial({
+            color: 0xff007f,
+            wireframe: false,
+            roughness: 0.2,
+            metalness: 0.9
+        });
+        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+        logoGroup.add(coreMesh);
+
+        // Canvas 2D interno para texturizar las iniciales KBQC sobre el núcleo o plano frontal del logo
+        const canvasText = document.createElement('canvas');
+        canvasText.width = 256;
+        canvasText.height = 256;
+        const ctx = canvasText.getContext('2d');
+        
+        function updateLogoTextTexture() {
+            ctx.clearRect(0, 0, 256, 256);
+            ctx.fillStyle = '#05050a';
+            ctx.fillRect(0, 0, 256, 256);
+
+            // Borde tecnológico
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(10, 10, 236, 236);
+
+            // Texto de las iniciales KBQC
+            ctx.fillStyle = '#00f0ff';
+            ctx.font = 'bold 52px Orbitron, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = '#ff007f';
+            ctx.shadowBlur = 15;
+            ctx.fillText('KBQC', 128, 100);
+
+            // Subtítulo Informático
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillText('SUPER 3D', 128, 165);
+        }
+        updateLogoTextTexture();
+
+        const textTexture = new THREE.CanvasTexture(canvasText);
+        const planeGeo = new THREE.PlaneGeometry(2.2, 2.2);
+        const planeMat = new THREE.MeshBasicMaterial({
+            map: textTexture,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+        const textPlane = new THREE.Mesh(planeGeo, planeMat);
+        textPlane.position.z = 1.31;
+        logoGroup.add(textPlane);
+
+        // Copia en la parte posterior para visibilidad completa 360
+        const textPlaneBack = textPlane.clone();
+        textPlaneBack.position.z = -1.31;
+        textPlaneBack.rotation.y = Math.PI;
+        logoGroup.add(textPlaneBack);
+
+        logoScene.add(logoGroup);
+
+        const logoLight = new THREE.PointLight(0xffffff, 3);
+        logoLight.position.set(5, 5, 5);
+        logoScene.add(logoLight);
+        logoScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+        logoCamera.position.z = 4.2;
+
+        let mouseX = 0, mouseY = 0;
+        logoContainer.addEventListener('mousemove', (event) => {
+            const rect = logoContainer.getBoundingClientRect();
+            mouseX = ((event.clientX - rect.left) / logoContainer.clientWidth) * 2 - 1;
+            mouseY = -((event.clientY - rect.top) / logoContainer.clientHeight) * 2 + 1;
+        });
+
+
+        // --- 3. BUCLE DE ANIMACIÓN GLOBAL ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            torusKnot.rotation.x += 0.005;
+            torusKnot.rotation.y += 0.007;
+            particlesMesh.rotation.y -= 0.001;
+
+            logoGroup.rotation.x += 0.008 + (mouseY * 0.04);
+            logoGroup.rotation.y += 0.012 + (mouseX * 0.04);
+            outerMesh.rotation.z -= 0.003;
+            coreMesh.rotation.y += 0.02;
+
+            renderer.render(scene, camera);
+            logoRenderer.render(logoScene, logoCamera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+
+        // --- 4. GESTIÓN DE BASE DE DATOS LOCAL (LOCALSTORAGE) ---
+        const studentForm = document.getElementById('local-student-form');
+        const localStudentsList = document.getElementById('local-students-list');
+
+        function loadLocalStudents() {
+            const students = JSON.parse(localStorage.getItem('btpi_local_students')) || [];
+            localStudentsList.innerHTML = '';
+
+            if (students.length === 0) {
+                localStudentsList.innerHTML = '<p style="color: #a0a0c0; text-align: center;">No hay registros guardados todavía.</p>';
+                return;
+            }
+
+            students.forEach((student) => {
+                const item = document.createElement('div');
+                item.className = 'local-record-item';
+                item.innerHTML = `
+                    <div><strong>Nombre:</strong> <span>${student.name}</span></div>
+                    <div><strong>Grado:</strong> <span>${student.grade}</span></div>
+                    <div><strong>Carrera:</strong> <span>${student.specialty}</span></div>
+                `;
+                localStudentsList.appendChild(item);
+            });
+        }
+
+        studentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('db-name').value;
+            const gradeInput = document.getElementById('db-grade').value;
+            const specialtyInput = document.getElementById('db-specialty').value;
+
+            const newStudent = {
+                name: nameInput,
+                grade: gradeInput,
+                specialty: specialtyInput
+            };
+
+            const students = JSON.parse(localStorage.getItem('btpi_local_students')) || [];
+            students.push(newStudent);
+            localStorage.setItem('btpi_local_students', JSON.stringify(students));
+
+            studentForm.reset();
+            loadLocalStudents();
+        });
+
+        loadLocalStudents();
+    </script>
+</body>
+</html>
